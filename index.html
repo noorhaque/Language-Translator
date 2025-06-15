@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Translator App</title> <!-- Simplified Title -->
+    <title>Translator App (Ads Removed)</title>
     <style>
         :root {
             --primary-color: #007AFF; --primary-light: #EBF5FF; --background-color: #F0F2F5;
@@ -26,7 +26,12 @@
         .side-menu a:hover { background-color: var(--primary-light); color: var(--primary-color); }
         .menu-overlay-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000; display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
         .menu-overlay-backdrop.active { display: block; opacity: 1; }
-        .container > #appOpenAdStatus, .container > .card:first-of-type { margin-top: 45px; }
+        
+        /* Adjust top margin for content below fixed menu button */
+        .container > .card:first-of-type { 
+             margin-top: 50px; /* Make space for the fixed menu toggle button */
+        }
+
         .language-selectors { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
         .language-group { flex: 1; }
         .language-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.85em; color: var(--secondary-text-color); }
@@ -63,14 +68,24 @@
         .translate-button { display: block; width: 100%; background-color: var(--success-color); color: var(--light-text-color); border: none; padding: 12px 15px; font-size: 1em; font-weight: 500; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.2s ease-in-out; text-align: center; margin-top: 10px; }
         .translate-button:hover { background-color: #28a745; }
         .translate-button:disabled { background-color: var(--secondary-text-color); cursor: not-allowed; opacity: 0.7; }
-        .admob-banner-placeholder { width: 100%; height: 50px; background-color: #e9ecef; border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.9em; color: var(--secondary-text-color); position: fixed; bottom: 0; left: 0; z-index: 1000; }
-        .admob-interstitial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 2000; display: none; justify-content: center; align-items: center; color: var(--light-text-color); text-align: center; padding: 20px; box-sizing: border-box; }
-        .admob-interstitial-content { background-color: var(--card-background-color); color: var(--text-color); padding: 25px; border-radius: var(--border-radius); box-shadow: 0 0 25px rgba(0,0,0,0.25); max-width: 90%; width: 320px; }
-        .admob-interstitial-content h3 { margin-top: 0; color: var(--primary-color); font-weight: 600; }
-        .close-interstitial-btn { position: absolute; top: 15px; right: 15px; background-color: rgba(255, 255, 255, 0.15); color: var(--light-text-color); border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1.3em; cursor: pointer; line-height: 30px; text-align: center; }
-        footer { text-align: center; padding: 15px; font-size: 0.8em; color: var(--secondary-text-color); margin-bottom: 55px; }
-        #appOpenAdStatus { background-color: var(--primary-light); padding: 8px; text-align: center; font-size: 0.85em; display: none; border-bottom: 1px solid #cce0ff; color: var(--primary-color); margin-bottom: 15px;}
-        /* Modal styles are no longer needed if permissionModal is removed */
+        
+        /* AdMob placeholder CSS REMOVED */
+
+        footer { text-align: center; padding: 15px; font-size: 0.8em; color: var(--secondary-text-color); margin-bottom: 20px; /* Adjusted if no fixed banner */ }
+        /* #appOpenAdStatus CSS REMOVED or styling removed if div is gone */
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1003; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
+        .modal-content { background-color: var(--card-background-color); padding: 25px; border-radius: var(--border-radius); box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 90%; max-width: 450px; position: relative; transform: translateY(-20px); transition: transform 0.3s ease; text-align: center; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-content h2 { margin-top: 0; color: var(--primary-color); font-size: 1.3em; margin-bottom: 15px; }
+        .modal-content p { font-size: 0.95em; line-height: 1.6; margin-bottom: 10px; }
+        .modal-content ul { font-size: 0.85em; padding-left: 20px; margin-bottom: 20px; text-align: left; }
+        .modal-content li { margin-bottom: 5px; }
+        .modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8em; font-weight: bold; color: var(--secondary-text-color); cursor: pointer; border: none; background: none; }
+        .modal-close-btn:hover { color: var(--text-color); }
+        .modal-button.primary { background-color: var(--action-blue); color: white; display: block; width: 100%; padding: 10px 15px; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 0.95em; margin-top: 15px; transition: background-color 0.2s; }
+        .modal-button.primary:hover { background-color: #0056b3; }
         @media (max-width: 480px) { .language-selectors { flex-direction: column; align-items: stretch; } .language-group { width: 100%; } .card { padding: 15px; } .output-actions { flex-direction: column;} }
     </style>
 </head>
@@ -85,7 +100,7 @@
                 <a href="https://play.google.com/store/apps/developer?id=YourDeveloperName" target="_blank">More Apps</a>
             </nav>
         </div>
-        <div id="appOpenAdStatus">Simulating App Open Ad...</div>
+        <!-- appOpenAdStatus div REMOVED -->
         
         <div class="card">
             <!-- Experimental text paragraph REMOVED -->
@@ -133,13 +148,17 @@
 
     <footer><p>© 2023 Translator Demo.</p></footer>
     
-    <!-- Permission Modal REMOVED from HTML -->
-
-    <div class="admob-banner-placeholder" id="bannerAdPlaceholder">Simulated Banner Ad</div>
-    <div class="admob-interstitial-overlay" id="interstitialAdOverlay">
-        <button class="close-interstitial-btn" onclick="hideInterstitialAd()">×</button>
-        <div class="admob-interstitial-content"><h3>Advertisement</h3><p>Simulated interstitial ad.</p></div>
+    <div id="permissionModal" class="modal-overlay"> 
+        <div class="modal-content">
+            <span class="modal-close-btn" onclick="closePermissionModal()">×</span>
+            <h2 id="permissionModalTitle">Permission Needed</h2> 
+            <p id="permissionModalTextEl">This feature requires certain permissions. Please check your browser settings.</p> 
+            <p><em>Instructions for common browsers are usually found by clicking the lock/info icon near the address bar.</em></p>
+            <button onclick="closePermissionModal();" class="modal-button primary">Okay, I'll Check</button>
+        </div>
     </div>
+
+    <!-- AdMob Placeholders REMOVED from HTML -->
 
     <script>
         const languages = {};
@@ -175,10 +194,8 @@
         const speechToTextBtn = document.getElementById('speechToTextBtn'); 
         const speechStatusEl = document.getElementById('speechStatus'); 
         const textToSpeechBtn = document.getElementById('textToSpeechBtn'); 
-        // permissionModalEl REMOVED
-        const appOpenAdStatusEl = document.getElementById('appOpenAdStatus');
-        const bannerAdPlaceholder = document.getElementById('bannerAdPlaceholder');
-        const interstitialAdOverlay = document.getElementById('interstitialAdOverlay');
+        const permissionModalEl = document.getElementById('permissionModal');
+        // appOpenAdStatusEl, bannerAdPlaceholder, interstitialAdOverlay REMOVED from const list
         const menuToggleBtn = document.getElementById('menuToggleBtn');
         const sideMenu = document.getElementById('sideMenu');
         let menuOverlayBackdrop = null; 
@@ -201,29 +218,43 @@
                 recognition.interimResults = false; 
                 recognition.onstart = () => { /* ... */ };
                 recognition.onresult = (event) => { /* ... */ };
-                recognition.onerror = (event) => { /* ... (showPermissionModal calls will now do nothing or error if function is fully removed) */ };
+                recognition.onerror = (event) => { /* ... */ };
                 recognition.onend = () => { /* ... */ };
             } catch (e) { recognition = null; }
         }
-        // No explicit hiding of buttons here if API not supported; handled in DOMContentLoaded if element exists
 
-        // showPermissionModal and closePermissionModal functions REMOVED
-
+        function showPermissionModal(title = "Permission Needed", text = "This feature requires permission...") { 
+            if(permissionModalEl) {
+                const modalTitle = permissionModalEl.querySelector('h2');
+                const modalMainText = permissionModalEl.querySelector('#permissionModalTextEl'); 
+                if(modalTitle) modalTitle.textContent = title;
+                if(modalMainText) modalMainText.textContent = text; 
+                else { 
+                    const firstP = permissionModalEl.querySelector('p');
+                    if (firstP) firstP.textContent = text;
+                }
+                permissionModalEl.classList.add('active'); 
+            }
+        }
+        function closePermissionModal() { if(permissionModalEl) permissionModalEl.classList.remove('active'); }
+        
         function populateLanguageSelectors() { /* ... (same full function) ... */ }
         async function translateSingleChunk(textChunk, sourceLang, targetLang) { /* ... (same full function) ... */ }
         async function translateLargeText(fullText, sourceLang, targetLang) { /* ... (same full function) ... */ }
         function updateCharCounter() { /* ... (same full function) ... */ }
         function displayActionStatus(message, success = true) { /* ... (same full function) ... */ }
-        let adActionCount = 0; const INTERSTITIAL_TRIGGER_COUNT = 1; 
-        function simulateAppOpenAdCheck() { /* ... (same full function) ... */ }
-        function showBannerAd() { /* ... (same full function) ... */ }
-        function showInterstitialAd() { /* ... (same full function) ... */ }
-        function hideInterstitialAd() { /* ... (same full function) ... */ }
+        // Ad Simulation Functions REMOVED
+        // let adActionCount = 0; const INTERSTITIAL_TRIGGER_COUNT = 1; 
+        // function simulateAppOpenAdCheck() { /* ... */ }
+        // function showBannerAd() { /* ... */ }
+        // function showInterstitialAd() { /* ... */ }
+        // function hideInterstitialAd() { /* ... */ }
+
         function createMenuBackdrop() { /* ... (same full function) ... */ }
         function toggleMenuBackdrop() { /* ... (same full function) ... */ }
         function hideMenuBackdrop() { /* ... (same full function) ... */ }
 
-        // --- Full implementations of stubbed functions (ensure they are complete) ---
+        // --- Full implementations of stubbed functions ---
         recognition.onstart = () => { isListening = true; speechToTextBtn.classList.add('listening'); speechStatusEl.textContent = "Listening..."; console.log("Speech recognition started."); };
         recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; inputTextEl.value = transcript; updateCharCounter(); speechStatusEl.textContent = "Speech recognized."; console.log("Speech recognized:", transcript); };
         recognition.onerror = (event) => {
@@ -231,7 +262,7 @@
             let message = "Speech error.";
             if (event.error === 'no-speech') message = "No speech detected.";
             else if (event.error === 'audio-capture') message = "Mic problem.";
-            else if (event.error === 'not-allowed') { message = "Mic permission denied. Check browser settings."; /* Removed showPermissionModal */ }
+            else if (event.error === 'not-allowed') { message = "Mic permission denied. Check browser settings."; showPermissionModal('Microphone Access Denied', 'This app needs microphone access for speech input. Please allow it in your browser settings.');}
             else if (event.error === 'language-not-supported') message = `Speech lang not supported.`;
             speechStatusEl.textContent = message;
             isListening = false; speechToTextBtn.classList.remove('listening');
@@ -240,7 +271,6 @@
          if (!SpeechRecognition) {
             console.warn("Speech Recognition API not supported.");
         }
-
 
         populateLanguageSelectors = function() {
             sourceLanguageSelect.innerHTML = ''; targetLanguageSelect.innerHTML = '';
@@ -298,10 +328,6 @@
                 setTimeout(() => { actionStatusEl.textContent = ''; }, 3000);
             }
         };
-        simulateAppOpenAdCheck = function() { if(appOpenAdStatusEl) {appOpenAdStatusEl.style.display = 'block'; setTimeout(() => { appOpenAdStatusEl.style.display = 'none'; }, 2000);} };
-        showBannerAd = function() { if(bannerAdPlaceholder) bannerAdPlaceholder.style.display = 'flex'; };
-        showInterstitialAd = function() { if(interstitialAdOverlay) interstitialAdOverlay.style.display = 'flex'; };
-        hideInterstitialAd = function() { if(interstitialAdOverlay) interstitialAdOverlay.style.display = 'none'; };
         createMenuBackdrop = function() {
             if (!menuOverlayBackdrop) {
                 menuOverlayBackdrop = document.createElement('div'); menuOverlayBackdrop.className = 'menu-overlay-backdrop';
@@ -322,14 +348,30 @@
             const localTextToSpeechBtn = document.getElementById('textToSpeechBtn');
 
             populateLanguageSelectors(); 
-            simulateAppOpenAdCheck(); 
-            showBannerAd(); 
+            // Ad simulation calls REMOVED
             updateCharCounter(); 
 
             inputTextEl.addEventListener('input', updateCharCounter);
             
-            translateBtn.addEventListener('click', () => { /* ... */ });
-            copyOutputBtn.addEventListener('click', () => { /* ... */ });
+            translateBtn.addEventListener('click', () => {
+                const textToTranslate = inputTextEl.value.substring(0, MAX_INPUT_CHARS); 
+                const sourceLangCode = sourceLanguageSelect.value; 
+                const targetLangCode = targetLanguageSelect.value;
+                if (sourceLangCode === targetLangCode && sourceLangCode !== 'auto') {
+                    outputTextEl.value = textToTranslate; return;
+                }
+                translateLargeText(textToTranslate, sourceLangCode, targetLangCode);
+                // Ad interstitial trigger REMOVED
+            });
+
+            copyOutputBtn.addEventListener('click', () => {
+                const textToCopy = outputTextEl.value;
+                if (textToCopy) {
+                    navigator.clipboard.writeText(textToCopy)
+                        .then(() => { displayActionStatus('Translated text copied!'); })
+                        .catch(err => { displayActionStatus('Failed to copy.', false); });
+                } else { displayActionStatus('Nothing to copy.', false); }
+            });
 
             if (localSpeechToTextBtn) { 
                 if (SpeechRecognition && recognition) { 
@@ -362,7 +404,7 @@
             if (localTextToSpeechBtn) { 
                 if (synth) { 
                     localTextToSpeechBtn.style.display = 'inline-flex'; 
-                    localTextToSpeechBtn.addEventListener('click', () => { /* ... (Full TTS click logic from previous code) ... */
+                    localTextToSpeechBtn.addEventListener('click', () => {
                         const textToSpeak = outputTextEl.value;
                         if (!textToSpeak.trim()) { displayActionStatus("Nothing to speak.", false); return; }
                         if (synth.speaking) { synth.cancel(); localTextToSpeechBtn.classList.remove('speaking'); if (currentUtterance && currentUtterance.text === textToSpeak) { currentUtterance = null; return; } }
@@ -380,30 +422,8 @@
                 }
             }  
 
-            // Translate button full logic
-            translateBtn.addEventListener('click', () => {
-                const textToTranslate = inputTextEl.value.substring(0, MAX_INPUT_CHARS); 
-                const sourceLangCode = sourceLanguageSelect.value; 
-                const targetLangCode = targetLanguageSelect.value;
-                if (sourceLangCode === targetLangCode && sourceLangCode !== 'auto') {
-                    outputTextEl.value = textToTranslate; return;
-                }
-                translateLargeText(textToTranslate, sourceLangCode, targetLangCode);
-                adActionCount++; 
-                if (adActionCount % INTERSTITIAL_TRIGGER_COUNT === 0) { showInterstitialAd(); }
-            });
-            // Copy button full logic
-             copyOutputBtn.addEventListener('click', () => {
-                const textToCopy = outputTextEl.value;
-                if (textToCopy) {
-                    navigator.clipboard.writeText(textToCopy)
-                        .then(() => { displayActionStatus('Translated text copied!'); })
-                        .catch(err => { displayActionStatus('Failed to copy.', false); });
-                } else { displayActionStatus('Nothing to copy.', false); }
-            });
-
             if (menuToggleBtn && sideMenu) { /* ... (menu logic) ... */ }
-            if (menuToggleBtn && sideMenu) {
+             if (menuToggleBtn && sideMenu) {
                 menuToggleBtn.addEventListener('click', (event) => {
                     event.stopPropagation(); 
                     sideMenu.classList.toggle('open');
@@ -417,7 +437,7 @@
                 });
             }
             
-            console.log("App initialized (no exit pop-up, no permission modal).");
+            console.log("App initialized (Ads Removed).");
         });
     </script>
 </body>

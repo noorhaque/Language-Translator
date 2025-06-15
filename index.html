@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Translator - Element Fullscreen</title>
+    <title>Translator App</title> <!-- Simplified Title -->
     <style>
         :root {
             --primary-color: #007AFF; --primary-light: #EBF5FF; --background-color: #F0F2F5;
@@ -15,21 +15,18 @@
         }
         body { font-family: var(--font-family); margin: 0; background-color: var(--background-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; line-height: 1.5; }
         .container { flex-grow: 1; max-width: 700px; margin: 20px auto; padding: 0 15px; width: 100%; box-sizing: border-box; position: relative; }
-        .card { background-color: var(--card-background-color); padding: 25px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-top: 20px; }
-        
-        /* Styles for when the card is in fullscreen mode */
-        .card:fullscreen {
-            background-color: var(--background-color); /* Or your desired fullscreen background */
-            padding: 20px; /* Adjust padding for fullscreen */
-            overflow-y: auto; /* Allow scrolling if content exceeds screen height */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Optional: center content vertically */
-        }
-        .card:-webkit-full-screen { background-color: var(--background-color); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; justify-content: center;}
-        .card:-moz-full-screen { background-color: var(--background-color); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; justify-content: center;}
-        .card:-ms-fullscreen { background-color: var(--background-color); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; justify-content: center;}
-
+        .card { background-color: var(--card-background-color); padding: 25px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-top: 10px; }
+        .menu-container {}
+        .menu-toggle-btn { background: none; border: none; font-size: 1.8em; color: var(--primary-color); cursor: pointer; padding: 8px 12px; position: fixed; top: 10px;  left: 10px; z-index: 1002; line-height: 1; }
+        .menu-toggle-btn:hover { opacity: 0.7; }
+        .side-menu { position: fixed; top: 0; left: -280px; width: 260px; height: 100%; background-color: var(--card-background-color); box-shadow: 2px 0 10px rgba(0,0,0,0.15); padding-top: 50px; transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1001; overflow-y: auto; }
+        .side-menu.open { left: 0; }
+        .side-menu a { display: block; padding: 14px 20px; text-decoration: none; color: var(--text-color); font-size: 0.95em; font-weight: 500; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s, color 0.2s; }
+        .side-menu a:first-child { border-top: 1px solid var(--border-color); }
+        .side-menu a:hover { background-color: var(--primary-light); color: var(--primary-color); }
+        .menu-overlay-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000; display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .menu-overlay-backdrop.active { display: block; opacity: 1; }
+        .container > #appOpenAdStatus, .container > .card:first-of-type { margin-top: 45px; }
         .language-selectors { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
         .language-group { flex: 1; }
         .language-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.85em; color: var(--secondary-text-color); }
@@ -63,45 +60,35 @@
         .action-button svg { margin-right: 8px; width: 16px; height: 16px; fill: currentColor; }
         #copyOutputBtn { background-color: var(--secondary-text-color); }
         #copyOutputBtn:hover { background-color: #555; }
-        #shareOutputBtn { background-color: var(--action-blue); display: none; }
-        #shareOutputBtn:hover { background-color: #0056b3; } 
         .translate-button { display: block; width: 100%; background-color: var(--success-color); color: var(--light-text-color); border: none; padding: 12px 15px; font-size: 1em; font-weight: 500; border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.2s ease-in-out; text-align: center; margin-top: 10px; }
         .translate-button:hover { background-color: #28a745; }
         .translate-button:disabled { background-color: var(--secondary-text-color); cursor: not-allowed; opacity: 0.7; }
-        footer { text-align: center; padding: 15px; font-size: 0.8em; color: var(--secondary-text-color); margin-top: 20px; }
-        .fullscreen-toggle-container { text-align: right; margin-bottom: 10px; /* position: fixed; top: 10px; right: 10px; z-index: 1002; Optional: for fixed position */ }
-        #fullscreenBtn { background: none; border: none; cursor: pointer; padding: 5px; opacity: 0.6; }
-        #fullscreenBtn:hover { opacity: 1;}
-        #fullscreenBtn svg { width: 20px; height: 20px; fill: var(--secondary-text-color); }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1003; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s; }
-        .modal-overlay.active { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
-        .modal-content { background-color: var(--card-background-color); padding: 25px; border-radius: var(--border-radius); box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 90%; max-width: 450px; position: relative; transform: translateY(-20px); transition: transform 0.3s ease; text-align: center; }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
-        .modal-content h2 { margin-top: 0; color: var(--primary-color); font-size: 1.3em; margin-bottom: 15px; }
-        .modal-content p { font-size: 0.95em; line-height: 1.6; margin-bottom: 10px; }
-        .modal-content ul { font-size: 0.85em; padding-left: 20px; margin-bottom: 20px; text-align: left; }
-        .modal-content li { margin-bottom: 5px; }
-        .modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8em; font-weight: bold; color: var(--secondary-text-color); cursor: pointer; border: none; background: none; }
-        .modal-close-btn:hover { color: var(--text-color); }
-        .modal-button.primary { background-color: var(--action-blue); color: white; display: block; width: 100%; padding: 10px 15px; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 0.95em; margin-top: 15px; transition: background-color 0.2s; }
-        .modal-button.primary:hover { background-color: #0056b3; }
+        .admob-banner-placeholder { width: 100%; height: 50px; background-color: #e9ecef; border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.9em; color: var(--secondary-text-color); position: fixed; bottom: 0; left: 0; z-index: 1000; }
+        .admob-interstitial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 2000; display: none; justify-content: center; align-items: center; color: var(--light-text-color); text-align: center; padding: 20px; box-sizing: border-box; }
+        .admob-interstitial-content { background-color: var(--card-background-color); color: var(--text-color); padding: 25px; border-radius: var(--border-radius); box-shadow: 0 0 25px rgba(0,0,0,0.25); max-width: 90%; width: 320px; }
+        .admob-interstitial-content h3 { margin-top: 0; color: var(--primary-color); font-weight: 600; }
+        .close-interstitial-btn { position: absolute; top: 15px; right: 15px; background-color: rgba(255, 255, 255, 0.15); color: var(--light-text-color); border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1.3em; cursor: pointer; line-height: 30px; text-align: center; }
+        footer { text-align: center; padding: 15px; font-size: 0.8em; color: var(--secondary-text-color); margin-bottom: 55px; }
+        #appOpenAdStatus { background-color: var(--primary-light); padding: 8px; text-align: center; font-size: 0.85em; display: none; border-bottom: 1px solid #cce0ff; color: var(--primary-color); margin-bottom: 15px;}
+        /* Modal styles are no longer needed if permissionModal is removed */
         @media (max-width: 480px) { .language-selectors { flex-direction: column; align-items: stretch; } .language-group { width: 100%; } .card { padding: 15px; } .output-actions { flex-direction: column;} }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="fullscreen-toggle-container">
-            <button id="fullscreenBtn" title="Toggle Fullscreen">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h2v3h-2v2h-3v-2h3v-3zm2-4v5h-2V7h-3V5h5z"/>
-                </svg>
-            </button>
+        <div class="menu-container">
+            <button id="menuToggleBtn" class="menu-toggle-btn"> ☰ </button>
+            <nav id="sideMenu" class="side-menu">
+                <a href="about.html" target="_blank">About Us</a>
+                <a href="contact.html" target="_blank">Contact Us</a>
+                <a href="privacy.html" target="_blank">Privacy Policy</a>
+                <a href="https://play.google.com/store/apps/developer?id=YourDeveloperName" target="_blank">More Apps</a>
+            </nav>
         </div>
+        <div id="appOpenAdStatus">Simulating App Open Ad...</div>
         
-        <div class="card"> <!-- This is the element that will go fullscreen -->
-            <p style="font-size: 0.8em; color: var(--secondary-text-color); text-align: center; margin-top: -10px; margin-bottom: 15px;">
-            </p>
+        <div class="card">
+            <!-- Experimental text paragraph REMOVED -->
             <div class="language-selectors">
                 <div class="language-group"><label for="sourceLanguage">Translate From (Speech Language):</label><select id="sourceLanguage"></select></div>
                 <div class="language-group"><label for="targetLanguage">Translate To:</label><select id="targetLanguage"></select></div>
@@ -136,11 +123,7 @@
              <div class="output-actions">
                 <button id="copyOutputBtn" class="action-button">
                     <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1.5 4H8l-2 2v10l2 2h6.5l2-2V7l-2-2zM15 17H8.5V7.5H15V17z"></path></svg>
-                    Copy Text
-                </button>
-                <button id="shareOutputBtn" class="action-button"> 
-                    <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M10 3a2 2 0 100 4 2 2 0 000-4zM7 9a3 3 0 100-6 3 3 0 000 6zm8.707 2.293a1 1 0 00-1.414 0L13 12.586V9a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 000-1.414zM13 7a3 3 0 100-6 3 3 0 000 6zm-1 9a1 1 0 10-2 0v.586L8.707 15.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L12 17.586V16z"></path></svg>
-                    Share Text
+                    Copy Translated Text
                 </button>
             </div>
             <button class="translate-button" id="translateBtn">Translate Text</button>
@@ -150,14 +133,12 @@
 
     <footer><p>© 2023 Translator Demo.</p></footer>
     
-    <div id="permissionModal" class="modal-overlay"> 
-        <div class="modal-content">
-            <span class="modal-close-btn" onclick="closePermissionModal()">×</span>
-            <h2 id="permissionModalTitle">Permission Needed</h2> 
-            <p id="permissionModalTextEl">This feature requires certain permissions. Please check your browser settings.</p> 
-            <p><em>Instructions for common browsers are usually found by clicking the lock/info icon near the address bar.</em></p>
-            <button onclick="closePermissionModal();" class="modal-button primary">Okay, I'll Check</button>
-        </div>
+    <!-- Permission Modal REMOVED from HTML -->
+
+    <div class="admob-banner-placeholder" id="bannerAdPlaceholder">Simulated Banner Ad</div>
+    <div class="admob-interstitial-overlay" id="interstitialAdOverlay">
+        <button class="close-interstitial-btn" onclick="hideInterstitialAd()">×</button>
+        <div class="admob-interstitial-content"><h3>Advertisement</h3><p>Simulated interstitial ad.</p></div>
     </div>
 
     <script>
@@ -190,14 +171,17 @@
         const progressBarContainerEl = document.getElementById('progressBarContainer');
         const progressBarEl = document.getElementById('progressBar');
         const copyOutputBtn = document.getElementById('copyOutputBtn');
-        const shareOutputBtn = document.getElementById('shareOutputBtn'); 
         const actionStatusEl = document.getElementById('actionStatus'); 
         const speechToTextBtn = document.getElementById('speechToTextBtn'); 
         const speechStatusEl = document.getElementById('speechStatus'); 
         const textToSpeechBtn = document.getElementById('textToSpeechBtn'); 
-        const permissionModalEl = document.getElementById('permissionModal');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const cardToFullscreen = document.querySelector('.card'); // Target the main card for fullscreen
+        // permissionModalEl REMOVED
+        const appOpenAdStatusEl = document.getElementById('appOpenAdStatus');
+        const bannerAdPlaceholder = document.getElementById('bannerAdPlaceholder');
+        const interstitialAdOverlay = document.getElementById('interstitialAdOverlay');
+        const menuToggleBtn = document.getElementById('menuToggleBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        let menuOverlayBackdrop = null; 
         
         const MAX_INPUT_CHARS = 25000; 
         const API_CHUNK_LIMIT = 4500;   
@@ -215,40 +199,49 @@
                 recognition = new SpeechRecognition();
                 recognition.continuous = false; 
                 recognition.interimResults = false; 
-                recognition.onstart = () => { isListening = true; speechToTextBtn.classList.add('listening'); speechStatusEl.textContent = "Listening... Speak now."; };
-                recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; inputTextEl.value = transcript; updateCharCounter(); speechStatusEl.textContent = "Speech recognized!"; };
-                recognition.onerror = (event) => {
-                    let message = `Speech error: ${event.error}.`;
-                    if (event.error === 'no-speech') message = "No speech detected.";
-                    else if (event.error === 'audio-capture') message = "Mic problem.";
-                    else if (event.error === 'not-allowed') { message = "Mic permission denied."; showPermissionModal('Microphone Access Denied', 'This app needs microphone access.');}
-                    else if (event.error === 'language-not-supported') message = `Speech lang not supported.`;
-                    speechStatusEl.textContent = message;
-                    isListening = false; speechToTextBtn.classList.remove('listening');
-                };
-                recognition.onend = () => { isListening = false; speechToTextBtn.classList.remove('listening'); if (speechStatusEl.textContent === "Listening... Speak now.") { speechStatusEl.textContent = "Finished. Click mic again.";}};
+                recognition.onstart = () => { /* ... */ };
+                recognition.onresult = (event) => { /* ... */ };
+                recognition.onerror = (event) => { /* ... (showPermissionModal calls will now do nothing or error if function is fully removed) */ };
+                recognition.onend = () => { /* ... */ };
             } catch (e) { recognition = null; }
         }
+        // No explicit hiding of buttons here if API not supported; handled in DOMContentLoaded if element exists
 
-        function showPermissionModal(title = "Permission Needed", text = "This feature requires permission.") { 
-            if(permissionModalEl) {
-                const modalTitle = permissionModalEl.querySelector('h2');
-                const modalMainText = permissionModalEl.querySelector('#permissionModalTextEl'); 
-                if(modalTitle) modalTitle.textContent = title;
-                if(modalMainText) modalMainText.textContent = text; 
-                else { const firstP = permissionModalEl.querySelector('p'); if (firstP) firstP.textContent = text; }
-                permissionModalEl.classList.add('active'); 
-            }
+        // showPermissionModal and closePermissionModal functions REMOVED
+
+        function populateLanguageSelectors() { /* ... (same full function) ... */ }
+        async function translateSingleChunk(textChunk, sourceLang, targetLang) { /* ... (same full function) ... */ }
+        async function translateLargeText(fullText, sourceLang, targetLang) { /* ... (same full function) ... */ }
+        function updateCharCounter() { /* ... (same full function) ... */ }
+        function displayActionStatus(message, success = true) { /* ... (same full function) ... */ }
+        let adActionCount = 0; const INTERSTITIAL_TRIGGER_COUNT = 1; 
+        function simulateAppOpenAdCheck() { /* ... (same full function) ... */ }
+        function showBannerAd() { /* ... (same full function) ... */ }
+        function showInterstitialAd() { /* ... (same full function) ... */ }
+        function hideInterstitialAd() { /* ... (same full function) ... */ }
+        function createMenuBackdrop() { /* ... (same full function) ... */ }
+        function toggleMenuBackdrop() { /* ... (same full function) ... */ }
+        function hideMenuBackdrop() { /* ... (same full function) ... */ }
+
+        // --- Full implementations of stubbed functions (ensure they are complete) ---
+        recognition.onstart = () => { isListening = true; speechToTextBtn.classList.add('listening'); speechStatusEl.textContent = "Listening..."; console.log("Speech recognition started."); };
+        recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; inputTextEl.value = transcript; updateCharCounter(); speechStatusEl.textContent = "Speech recognized."; console.log("Speech recognized:", transcript); };
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error, event.message);
+            let message = "Speech error.";
+            if (event.error === 'no-speech') message = "No speech detected.";
+            else if (event.error === 'audio-capture') message = "Mic problem.";
+            else if (event.error === 'not-allowed') { message = "Mic permission denied. Check browser settings."; /* Removed showPermissionModal */ }
+            else if (event.error === 'language-not-supported') message = `Speech lang not supported.`;
+            speechStatusEl.textContent = message;
+            isListening = false; speechToTextBtn.classList.remove('listening');
+        };
+        recognition.onend = () => { isListening = false; speechToTextBtn.classList.remove('listening'); if (speechStatusEl.textContent === "Listening...") { speechStatusEl.textContent = "Click mic to speak.";} console.log("Speech recognition ended.");};
+         if (!SpeechRecognition) {
+            console.warn("Speech Recognition API not supported.");
         }
-        function closePermissionModal() { if(permissionModalEl) permissionModalEl.classList.remove('active'); }
-        
-        function populateLanguageSelectors() { /* ... (same) ... */ }
-        async function translateSingleChunk(textChunk, sourceLang, targetLang) { /* ... (same) ... */ }
-        async function translateLargeText(fullText, sourceLang, targetLang) { /* ... (same) ... */ }
-        function updateCharCounter() { /* ... (same) ... */ }
-        function displayActionStatus(message, success = true) { /* ... (same) ... */ }
-        
-        // --- Full implementations of stubbed functions ---
+
+
         populateLanguageSelectors = function() {
             sourceLanguageSelect.innerHTML = ''; targetLanguageSelect.innerHTML = '';
             for (const code in languages) {
@@ -305,57 +298,61 @@
                 setTimeout(() => { actionStatusEl.textContent = ''; }, 3000);
             }
         };
+        simulateAppOpenAdCheck = function() { if(appOpenAdStatusEl) {appOpenAdStatusEl.style.display = 'block'; setTimeout(() => { appOpenAdStatusEl.style.display = 'none'; }, 2000);} };
+        showBannerAd = function() { if(bannerAdPlaceholder) bannerAdPlaceholder.style.display = 'flex'; };
+        showInterstitialAd = function() { if(interstitialAdOverlay) interstitialAdOverlay.style.display = 'flex'; };
+        hideInterstitialAd = function() { if(interstitialAdOverlay) interstitialAdOverlay.style.display = 'none'; };
+        createMenuBackdrop = function() {
+            if (!menuOverlayBackdrop) {
+                menuOverlayBackdrop = document.createElement('div'); menuOverlayBackdrop.className = 'menu-overlay-backdrop';
+                document.body.appendChild(menuOverlayBackdrop);
+                menuOverlayBackdrop.addEventListener('click', () => { if (sideMenu) sideMenu.classList.remove('open'); hideMenuBackdrop(); });
+            }
+        };
+        toggleMenuBackdrop = function() {
+            if (!menuOverlayBackdrop) createMenuBackdrop();
+            if (sideMenu && sideMenu.classList.contains('open')) { if (menuOverlayBackdrop) menuOverlayBackdrop.classList.add('active'); } 
+            else { if (menuOverlayBackdrop) menuOverlayBackdrop.classList.remove('active');}
+        };
+        hideMenuBackdrop = function() { if (menuOverlayBackdrop) menuOverlayBackdrop.classList.remove('active'); };
         // --- End of full implementations ---
 
-        // Fullscreen API handling
-        function toggleSpecificElementFullScreen(element) {
-            if (!element) { console.error("Element for fullscreen not found!"); return; }
-            if (!document.fullscreenElement) {
-                if (element.requestFullscreen) element.requestFullscreen();
-                else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
-                else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
-                else if (element.msRequestFullscreen) element.msRequestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                else if (document.msExitFullscreen) document.msExitFullscreen();
-            }
-        }
-
-        function updateFullscreenButtonIcon() {
-            if (!fullscreenBtn || !cardToFullscreen) return;
-            const isElementFullscreen = document.fullscreenElement === cardToFullscreen;
-            if (isElementFullscreen) {
-                fullscreenBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`;
-                fullscreenBtn.title = "Exit Fullscreen";
-            } else {
-                fullscreenBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h2v3h-2v2h-3v-2h3v-3zm2-4v5h-2V7h-3V5h5z"/></svg>`;
-                fullscreenBtn.title = "Enter Fullscreen";
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing app...");
-            
-            const localTextToSpeechBtn = document.getElementById('textToSpeechBtn');
             const localSpeechToTextBtn = document.getElementById('speechToTextBtn');
-            const localShareOutputBtn = document.getElementById('shareOutputBtn'); 
-            const localFullscreenBtn = document.getElementById('fullscreenBtn');
-            const localCardToFullscreen = document.querySelector('.card');
-
+            const localTextToSpeechBtn = document.getElementById('textToSpeechBtn');
 
             populateLanguageSelectors(); 
+            simulateAppOpenAdCheck(); 
+            showBannerAd(); 
             updateCharCounter(); 
 
             inputTextEl.addEventListener('input', updateCharCounter);
             
-            translateBtn.addEventListener('click', () => { /* ... (translate button logic) ... */ });
-            copyOutputBtn.addEventListener('click', () => { /* ... (copy button logic) ... */ });
+            translateBtn.addEventListener('click', () => { /* ... */ });
+            copyOutputBtn.addEventListener('click', () => { /* ... */ });
 
             if (localSpeechToTextBtn) { 
                 if (SpeechRecognition && recognition) { 
-                    localSpeechToTextBtn.addEventListener('click', () => { /* ... (STT logic) ... */ });
+                    localSpeechToTextBtn.addEventListener('click', () => {
+                        if (synth && synth.speaking) { synth.cancel(); if (localTextToSpeechBtn) localTextToSpeechBtn.classList.remove('speaking'); currentUtterance = null; }
+                        if (!isListening) {
+                            try {
+                                let speechLang = sourceLanguageSelect.value;
+                                if (speechLang === 'auto' || speechLang.length > 5 || !/^[a-z]{2}(-([A-Z]{2}|[0-9]{3}))?$/.test(speechLang)) {
+                                     speechLang = navigator.language || 'en-US'; 
+                                }
+                                recognition.lang = speechLang.replace('_', '-'); 
+                                recognition.start(); 
+                            } catch (e) {
+                                console.error("Error starting speech recognition:", e);
+                                if(speechStatusEl) speechStatusEl.textContent = "Could not start speech input.";
+                                if (e.name === "NotAllowedError") {
+                                   if(speechStatusEl) speechStatusEl.textContent = "Mic permission denied. Check browser settings.";
+                                   // Removed showPermissionModal call
+                                }
+                            }
+                        } else { recognition.stop(); }
+                    });
                 } else { 
                     localSpeechToTextBtn.style.display = 'none';
                     if(speechStatusEl) speechStatusEl.textContent = "Speech input not supported.";
@@ -365,41 +362,25 @@
             if (localTextToSpeechBtn) { 
                 if (synth) { 
                     localTextToSpeechBtn.style.display = 'inline-flex'; 
-                    localTextToSpeechBtn.addEventListener('click', () => { /* ... (TTS logic) ... */ });
+                    localTextToSpeechBtn.addEventListener('click', () => { /* ... (Full TTS click logic from previous code) ... */
+                        const textToSpeak = outputTextEl.value;
+                        if (!textToSpeak.trim()) { displayActionStatus("Nothing to speak.", false); return; }
+                        if (synth.speaking) { synth.cancel(); localTextToSpeechBtn.classList.remove('speaking'); if (currentUtterance && currentUtterance.text === textToSpeak) { currentUtterance = null; return; } }
+                        currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+                        let ttsLang = targetLanguageSelect.value;
+                        if (ttsLang.length > 5 || !/^[a-z]{2}(-([A-Z]{2}|[0-9]{3}))?$/.test(ttsLang)) { ttsLang = navigator.language || 'en-US'; }
+                        currentUtterance.lang = ttsLang.replace('_', '-');
+                        currentUtterance.onstart = () => { localTextToSpeechBtn.classList.add('speaking'); };
+                        currentUtterance.onend = () => { localTextToSpeechBtn.classList.remove('speaking'); currentUtterance = null; };
+                        currentUtterance.onerror = (event) => { localTextToSpeechBtn.classList.remove('speaking'); currentUtterance = null; displayActionStatus(`Error speaking: ${event.error}`, false); };
+                        synth.speak(currentUtterance);
+                    });
                 } else { 
                     localTextToSpeechBtn.style.display = 'none'; 
                 }
             }  
 
-            if (localShareOutputBtn) {
-                if (navigator.share) { 
-                    localShareOutputBtn.style.display = 'inline-flex'; 
-                    localShareOutputBtn.addEventListener('click', async () => {
-                        const textToShare = outputTextEl.value;
-                        const shareData = { title: 'Translated Text', text: textToShare };
-                        if (textToShare) {
-                            try { await navigator.share(shareData); displayActionStatus('Shared successfully!'); } 
-                            catch (err) { displayActionStatus('Sharing cancelled or failed.', false); console.error('Share Error:', err); }
-                        } else { displayActionStatus('Nothing to share.', false); }
-                    });
-                } else { 
-                    localShareOutputBtn.style.display = 'none'; 
-                    console.warn('Web Share API not supported, share button hidden.');
-                }
-            } else {
-                console.log("Share button (shareOutputBtn) not found.");
-            }
-
-            if (localFullscreenBtn && localCardToFullscreen) {
-                localFullscreenBtn.addEventListener('click', () => toggleSpecificElementFullScreen(localCardToFullscreen));
-                document.addEventListener('fullscreenchange', updateFullscreenButtonIcon);
-                document.addEventListener('webkitfullscreenchange', updateFullscreenButtonIcon);
-                document.addEventListener('mozfullscreenchange', updateFullscreenButtonIcon);
-                document.addEventListener('MSFullscreenChange', updateFullscreenButtonIcon);
-                updateFullscreenButtonIcon(); 
-            }
-            
-            // --- Re-pasting full event listener logic for clarity ---
+            // Translate button full logic
             translateBtn.addEventListener('click', () => {
                 const textToTranslate = inputTextEl.value.substring(0, MAX_INPUT_CHARS); 
                 const sourceLangCode = sourceLanguageSelect.value; 
@@ -408,8 +389,11 @@
                     outputTextEl.value = textToTranslate; return;
                 }
                 translateLargeText(textToTranslate, sourceLangCode, targetLangCode);
+                adActionCount++; 
+                if (adActionCount % INTERSTITIAL_TRIGGER_COUNT === 0) { showInterstitialAd(); }
             });
-            copyOutputBtn.addEventListener('click', () => {
+            // Copy button full logic
+             copyOutputBtn.addEventListener('click', () => {
                 const textToCopy = outputTextEl.value;
                 if (textToCopy) {
                     navigator.clipboard.writeText(textToCopy)
@@ -417,53 +401,23 @@
                         .catch(err => { displayActionStatus('Failed to copy.', false); });
                 } else { displayActionStatus('Nothing to copy.', false); }
             });
-            if (localSpeechToTextBtn && SpeechRecognition && recognition) { 
-                localSpeechToTextBtn.addEventListener('click', () => {
-                    if (synth && synth.speaking) { 
-                        synth.cancel();
-                        if (localTextToSpeechBtn) localTextToSpeechBtn.classList.remove('speaking');
-                        currentUtterance = null;
-                    }
-                    if (!isListening) {
-                        try {
-                            let speechLang = sourceLanguageSelect.value;
-                            if (speechLang === 'auto' || speechLang.length > 5 || !/^[a-z]{2}(-([A-Z]{2}|[0-9]{3}))?$/.test(speechLang)) {
-                                 speechLang = navigator.language || 'en-US'; 
-                            }
-                            recognition.lang = speechLang.replace('_', '-'); 
-                            recognition.start(); 
-                        } catch (e) {
-                            if(speechStatusEl) speechStatusEl.textContent = "Error starting speech input.";
-                            if (e.name === "NotAllowedError") {
-                                showPermissionModal('Microphone Access Denied', 'This app needs microphone access.');
-                            }
-                        }
-                    } else {
-                        recognition.stop();
+
+            if (menuToggleBtn && sideMenu) { /* ... (menu logic) ... */ }
+            if (menuToggleBtn && sideMenu) {
+                menuToggleBtn.addEventListener('click', (event) => {
+                    event.stopPropagation(); 
+                    sideMenu.classList.toggle('open');
+                    toggleMenuBackdrop();
+                });
+                document.addEventListener('click', (event) => { 
+                    if (sideMenu.classList.contains('open') && !sideMenu.contains(event.target) && event.target !== menuToggleBtn) {
+                        sideMenu.classList.remove('open');
+                        hideMenuBackdrop();
                     }
                 });
             }
-             if (localTextToSpeechBtn && synth) { 
-                localTextToSpeechBtn.addEventListener('click', () => {
-                    const textToSpeak = outputTextEl.value;
-                    if (!textToSpeak.trim()) { displayActionStatus("Nothing to speak.", false); return; }
-                    if (synth.speaking) { 
-                        synth.cancel(); localTextToSpeechBtn.classList.remove('speaking');
-                        if (currentUtterance && currentUtterance.text === textToSpeak) { currentUtterance = null; return; }
-                    }
-                    currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
-                    let ttsLang = targetLanguageSelect.value;
-                    if (ttsLang.length > 5 || !/^[a-z]{2}(-([A-Z]{2}|[0-9]{3}))?$/.test(ttsLang)) { ttsLang = navigator.language || 'en-US'; }
-                    currentUtterance.lang = ttsLang.replace('_', '-');
-                    currentUtterance.onstart = () => { localTextToSpeechBtn.classList.add('speaking'); };
-                    currentUtterance.onend = () => { localTextToSpeechBtn.classList.remove('speaking'); currentUtterance = null; };
-                    currentUtterance.onerror = (event) => { localTextToSpeechBtn.classList.remove('speaking'); currentUtterance = null; displayActionStatus(`Error speaking: ${event.error}`, false); };
-                    synth.speak(currentUtterance);
-                });
-            } 
-            // --- End of re-pasted listener logic ---
-
-            console.log("App initialized.");
+            
+            console.log("App initialized (no exit pop-up, no permission modal).");
         });
     </script>
 </body>
